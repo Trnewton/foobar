@@ -14,9 +14,17 @@ def cycle_index_symmetric(n):
     for l in range(1, int(n)):
         cycle_index_nl = cycle_index_symmetric(n-l)
         for term, coef in cycle_index_nl:
-            new_term = tuple(a_m if m+1 != l else a_m + 1 for m, a_m in enumerate(term)) \
-            #    + tuple(0 if m+1 + len(term) != l  else 1 for m in range(len(term)-l))
-            cycle_index[new_term] += coef
+            new_term = []
+            for m, a_m in enumerate(term, start=1):
+                new_term += [a_m if m != l else a_m+1]
+            
+            for m in range(len(term), int(n)):
+                new_term += [0 if m != l else 1]
+            
+            # new_term = tuple(a_m if m!=l else a_m + 1 for m, a_m in enumerate(term, start=1)) \
+            #    + tuple(0 if m + len(term) != l  else 1 for m in range(len(term)-l))
+            
+            cycle_index[tuple(new_term)] += coef
 
     cycle_index_list = cycle_index.items()
     cycle_index_list = [(idx, val/n) for idx, val in cycle_index_list]
