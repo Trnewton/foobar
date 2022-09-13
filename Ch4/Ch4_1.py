@@ -3,16 +3,16 @@
 This solution consists of two parts; first checking whether a pair of trainers will thumb
 wrestle forever and second finding a maximal matching of trainers that will fight forever.
 
-We can solve the first problem efficiently by realizing that the thumb war games state is 
+We can solve the first problem efficiently by realizing that the thumb war games state is
 completely determined by the number of bananas one of the trainers has and the total number
-of bananas. This means we can analysis the system of difference  equations by looking at 
-only one of the trainers banana stash. We can then perform a change of variables to 
-normalize the resulting system and realize that we are dealing with the Dyadic 
+of bananas. This means we can analysis the system of difference  equations by looking at
+only one of the trainers banana stash. We can then perform a change of variables to
+normalize the resulting system and realize that we are dealing with the Dyadic
 Transformation.This means we can use the binary representation of the initial conditions
 to determine if the system will orbit or not.
 
-To solve the second problem we can realize that the possible pairings of trainer that 
-loop forever can be thought of as edges in a graph. This then means the problem of 
+To solve the second problem we can realize that the possible pairings of trainer that
+loop forever can be thought of as edges in a graph. This then means the problem of
 distracting the greatest number of trainers is equivalent to finding the maximal cardinal
 matching of the resulting graph. We use Edmonds Blossom algorithm to compute this.
 '''
@@ -23,16 +23,16 @@ from collections import defaultdict
 
 def dyadic_orbit_check(a, b):
     '''Checks if two trainers will wrestle forever (true) or not (false).
-    
+
     By associating the thumb war game with the Dyadic Transformation
     we can check for fixed points by seeing if the initial condition
     has a finite binary representation once normalized.
-    
+
     Args:
         a (int): Number of bananas first trainer has
         b (int): Number of bananas second trainer has
     Returns:
-        bool: True iff the pairing of thumb warriors dooesn't reach a fixed point    
+        bool: True iff the pairing of thumb warriors dooesn't reach a fixed point
     '''
     T = a + b
     f = Fraction(a, T)
@@ -42,7 +42,7 @@ def dyadic_orbit_check(a, b):
 
 def compute_adj_dict(banana_list):
     '''Computes the pairings of trainers that will fight forever.
-    
+
     Args:
         banana_list (list): List of initial banana holdings by trainers
     Returns:
@@ -55,18 +55,18 @@ def compute_adj_dict(banana_list):
                 adj_dict[n].append(n+m)
                 adj_dict[n+m].append(n)
     return adj_dict
-    
+
 def maximal_matching(G, N):
     '''Uses Edmonds Blossom algorithm to compute maximum matching set of G.
-    
-    Reference: László Lovász and M. D. Plummer. Matching Theory, volume 121 of 
+
+    Reference: László Lovász and M. D. Plummer. Matching Theory, volume 121 of
                 Annals of Discrete Mathematics. North Holland, 1986.
 
     Args:
         G (dict of int: set): Ajacency map of G
         N (int): Number of nodes in G
     Returns:
-        matching (list of tuples): List of the bidirectional matchings in the 
+        matching (list of tuples): List of the bidirectional matchings in the
             maximum matching.
     '''
 
@@ -83,21 +83,21 @@ def maximal_matching(G, N):
 
     def is_base(x):
         return is_blossom(x) and phi[x] == x
-    
+
     def is_out_of_forest(x):
         return mu[x] != x and phi[mu[x]] == mu[x] and phi[x] == x
-    
+
     def S(x):
         '''Creates M-alternating path for x.'''
         S_x = [x]
         while True:
-            
+
             if mu[x] != x:
-                x = mu[x] 
+                x = mu[x]
                 S_x.append(x)
             else:
                 return S_x
-            
+
             if phi[x] != x:
                 x = phi[x]
                 S_x.append(x)
@@ -149,7 +149,7 @@ def maximal_matching(G, N):
                         for u in S_x:
                             if u in S_y_set and is_base(u):
                                 break
-                        
+
                         # Update maps to shrink blossom
                         for i, x_2i in enumerate(S_x[2::2], start=1):
                             if x_2i in S_y_set:
@@ -160,15 +160,15 @@ def maximal_matching(G, N):
                             if y_2i in S_x_set:
                                 break
                             phi[y_2i] = S_y[2*i-1]
-                        
+
                         phi[x] = y
                         phi[y] = x
-                        
+
                         # Update base point
                         for z, rho_z in enumerate(rho):
                             if rho_z in S_x_set or rho_z in S_y_set:
                                 rho[z] = u
-                
+
                 # Extend tree
                 elif is_out_of_forest(y):
                     phi[y] = x
@@ -192,7 +192,7 @@ def solution(banana_list):
         return 1
     if len(banana_list) < 3:
         return 2*int(~dyadic_orbit_check(banana_list[0], banana_list[1]))
-        
+
     adj_dict =  compute_adj_dict(banana_list)
 
     return len(banana_list) - 2 * len(maximal_matching(adj_dict, len(banana_list)))
